@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: glamira_source
+    database: glamira-project-k24-497708
+    schema: glamira_raw
+    tables:
+      - name: product_info
+      - name: ip_location
+      - name: summary19 #all data from 2019
