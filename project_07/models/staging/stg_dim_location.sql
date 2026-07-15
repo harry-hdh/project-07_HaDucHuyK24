@@ -33,7 +33,7 @@ stg_dim_location__gen_key AS (
         country_name,
         region_name,
         city_name,
-        FARM_FINGERPRINT(country_name || region_name || city_name) AS location_key
+        FARM_FINGERPRINT(country_name || region_name || city_name) AS location_id
     FROM stg_dim_location__dedup
 )
 

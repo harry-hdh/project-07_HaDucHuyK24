@@ -2,8 +2,8 @@ version: 2
 
 sources:
   - name: glamira_source
-    database: glamira-project-k24-497708
-    schema: glamira_raw
+    database: "{{ env_var('DBT_SOURCE_PROJECT', target.project) }}"
+    schema: "{{ env_var('DBT_SOURCE_SCHEMA', 'glamira_raw') }}"
     tables:
       - name: product_info
       - name: ip_location
