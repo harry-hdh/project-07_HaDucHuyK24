@@ -36,7 +36,23 @@ stg_dim_product__cast_type AS (
 stg_dim_product__dedup AS (
     SELECT DISTINCT *
     FROM stg_dim_product__cast_type
+),
+stg_dim_product__gen_key AS (
+    SELECT
+        product_id,
+        product_name,
+        product_category_name,
+        product_min_price,
+        product_max_price,
+        product_collection_name,
+        product_attribute,
+        product_gold_weight,
+        product_silver_weight,
+        product_non_metal_weight,
+        product_gender,
+        FARM_FINGERPRINT(product_id || product_name || product_category_name || product_collection_name) AS product_key
+    FROM stg_dim_product__dedup
 )
 
 SELECT *
-FROM stg_dim_product__dedup
+FROM stg_dim_product__gen_key

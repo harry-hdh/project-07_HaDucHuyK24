@@ -4,6 +4,7 @@ WITH stg_dim_store__source AS (
 ), 
 stg_dim_store__process_url AS (
     SELECT
+        store_id,
         concat('https://', net.host(current_url), '/') AS store_url
 
     FROM stg_dim_store__source
@@ -16,6 +17,7 @@ stg_dim_store__filtered AS (
 ),
 stg_dim_store__extract_extension AS (
     SELECT
+        store_id,
         store_url,
         regexp_extract(net.host(store_url), r'\.([a-zA-Z]+)$') as store_extension
 
@@ -24,6 +26,7 @@ stg_dim_store__extract_extension AS (
 
 stg_dim_store__transform_extension AS (
     SELECT 
+        store_id,
         store_url,
         case lower(store_extension)
             when 'com' then 'Global'
@@ -66,13 +69,14 @@ stg_dim_store__transform_extension AS (
 
 stg_dim_store__store_name AS (
     SELECT
+        store_id,
         store_url,
-        concat('Glamira', ' ', store_extension) as store_name,
-
+        concat('Glamira', ' ', store_extension) as store_name
     FROM stg_dim_store__transform_extension
 ),
 stg_dim_store__cast_type AS (
     SELECT
+        CAST(store_id AS INT64) AS store_id,
         CAST(store_url AS STRING) AS store_url,
         CAST(store_name AS STRING) AS store_name
     FROM stg_dim_store__store_name
@@ -83,9 +87,10 @@ stg_dim_store__dedup AS (
 ),
 stg_dim_store__gen_key AS (
     SELECT
+        store_id,
         store_url,
         store_name,
-        FARM_FINGERPRINT(store_url || store_name) AS store_id
+        FARM_FINGERPRINT(store_url || store_name) AS store_key
     FROM stg_dim_store__dedup
 )
 SELECT *

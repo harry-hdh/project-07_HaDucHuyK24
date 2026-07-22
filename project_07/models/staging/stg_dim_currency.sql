@@ -41,7 +41,7 @@ stg_dim_currency__process_currency AS(
             WHEN currency_code = '₲' THEN 'Paraguayan Guarani'
             WHEN currency_code = 'лв.' THEN 'Bulgarian Lev'
             WHEN currency_code = 'CRC ₡' THEN 'Costa Rican Colón'
-            WHEN currency_code = '1din.' THEN 'Serbian Dinar'
+            WHEN currency_code = 'din.' THEN 'Serbian Dinar'
             WHEN currency_code = 'NZD $' THEN 'New Zealand Dollar'
             WHEN currency_code = 'Kč' THEN 'Czech Koruna'
             WHEN currency_code = '₫' THEN 'Vietnamese Dong'

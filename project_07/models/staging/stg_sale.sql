@@ -1,0 +1,50 @@
+WITH stg_sale__source AS (
+    SELECT *
+    FROM {{ source('glamira_source', 'summary19') }}
+    WHERE collection = 'checkout_success'
+),
+stg_sale__extract AS (
+    SELECT
+        _id AS sale_id,
+        store_id,
+        user_id_db,
+        current_url,
+        local_time,
+        time_stamp,
+        country,
+        cart_products
+    FROM stg_sale__source
+),
+stg_sale__flatten AS (
+    SELECT
+        sale_id,
+        store_id,
+        user_id_db,
+        current_url,
+        local_time,
+        time_stamp,
+        country,
+        cart_product.product_id AS product_id,
+        cart_product.amount AS amount,
+        cart_product.price AS price,
+        cart_product.currency AS currency
+    FROM stg_sale__extract
+    LEFT JOIN UNNEST(stg_sale__extract.cart_products) AS cart_product
+),
+stg_sale__clean_price AS (
+    SELECT
+        sale_id,
+        store_id,
+        user_id_db,
+        current_url,
+        local_time,
+        time_stamp,
+        country,
+        product_id,
+        amount,
+        SAFE_CAST(REGEXP_REPLACE(price, r'[^0-9.]', '.') AS FLOAT64) AS price,
+        currency
+    FROM stg_sale__flatten
+    WHERE price IS NOT NULL
+)
+SELECT * FROM stg_sale__clean_price

@@ -8,3 +8,4 @@ sources:
       - name: product_info
       - name: ip_location
       - name: summary19 #all data from 2019
+      - name: raw_exchange_rates

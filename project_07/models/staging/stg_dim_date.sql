@@ -4,6 +4,7 @@ WITH stg_dim_date__source AS (
 ),
 stg_dim_date__extract AS (
     SELECT
+        local_time,
         EXTRACT(year FROM time_stamp) AS year,
         EXTRACT(month FROM time_stamp) AS month,
         EXTRACT(day FROM time_stamp) AS day,
@@ -23,6 +24,7 @@ stg_dim_date__extract AS (
 ),
 stg_dim_date__process AS (
     SELECT
+        local_time,
         year,
         month,
         day,
@@ -34,6 +36,7 @@ stg_dim_date__process AS (
 ),
 stg_dim_date__cast_type AS (
     SELECT
+        local_time,
         CAST(year AS INT64) AS year,
         CAST(month AS INT64) AS month,
         CAST(day AS INT64) AS day,
@@ -45,6 +48,7 @@ stg_dim_date__cast_type AS (
 ),
 stg_dim_date__gen_key AS (
     SELECT
+        local_time,
         year,
         month,
         day,

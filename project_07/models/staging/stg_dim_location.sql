@@ -5,7 +5,6 @@ WITH stg_dim_location__source AS (
 
 stg_dim_location__rename AS (
     SELECT
-        ip AS location_ip,
         country AS country_name,
         region AS region_name,
         city AS city_name
@@ -33,7 +32,7 @@ stg_dim_location__gen_key AS (
         country_name,
         region_name,
         city_name,
-        FARM_FINGERPRINT(country_name || region_name || city_name) AS location_id
+        FARM_FINGERPRINT(country_name || region_name || city_name) AS location_key
     FROM stg_dim_location__dedup
 )
 
