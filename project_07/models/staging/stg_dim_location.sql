@@ -14,7 +14,6 @@ stg_dim_location__rename AS (
 
 stg_dim_location__cast_type AS (
     SELECT
-        CAST(location_ip AS STRING) AS location_ip,
         CAST(country_name AS STRING) AS country_name,
         CAST(region_name AS STRING) AS region_name,
         CAST(city_name AS STRING) AS city_name
