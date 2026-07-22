@@ -2,7 +2,8 @@ With stg_dim_date AS (
     SELECT * FROM {{ ref('stg_dim_date') }}
 )
 SELECT
-    date_id,
+    date_key,
+    time_stamp,
     year,
     month,
     day,

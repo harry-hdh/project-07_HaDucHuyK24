@@ -3,6 +3,7 @@ WITH stg_dim_product AS (
     FROM {{ ref('stg_dim_product') }}
 )
 SELECT
+    product_key,
     product_id,
     product_name,
     product_category_name,

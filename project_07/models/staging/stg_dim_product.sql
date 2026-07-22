@@ -20,7 +20,7 @@ stg_dim_product__rename AS (
 ),
 stg_dim_product__cast_type AS (
     SELECT
-        CAST(product_id AS INT64) AS product_id,
+        COALESCE(CAST(product_id AS INT64), -1) AS product_id,
         CAST(product_name AS STRING) AS product_name,
         CAST(product_category_name AS STRING) AS product_category_name,
         CAST(product_min_price AS FLOAT64) AS product_min_price,

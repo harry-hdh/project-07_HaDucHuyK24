@@ -83,7 +83,7 @@ stg_dim_currency__gen_key AS (
         currency_name,
         inserted_date,
         inserted_by,
-        FARM_FINGERPRINT(currency_code || currency_name || inserted_by) AS currency_id
+        FARM_FINGERPRINT(currency_code || currency_name || inserted_by) AS currency_key
     FROM stg_dim_currency__process_inserted
 )
 SELECT *

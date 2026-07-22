@@ -2,8 +2,7 @@ WITH stg_location AS (
     SELECT * FROM {{ ref('stg_dim_location') }}
 )
 SELECT
-    location_id,
-    location_ip,
+    location_key,
     country_name,
     region_name,
     city_name
