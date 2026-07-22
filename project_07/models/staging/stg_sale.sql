@@ -3,27 +3,33 @@ WITH stg_sale__source AS (
     FROM {{ source('glamira_source', 'summary19') }}
     WHERE collection = 'checkout_success'
 ),
+location__source AS (
+    SELECT *
+    FROM {{ source('glamira_source', 'ip_location') }}
+),
 stg_sale__extract AS (
     SELECT
-        _id AS sale_id,
+        _id AS sale_key,
         store_id,
         user_id_db,
         current_url,
         local_time,
         time_stamp,
         country,
+        loc.country AS country_name,
         cart_products
     FROM stg_sale__source
+    JOIN location__source loc ON stg_sale__source.ip_address = loc.ip
 ),
 stg_sale__flatten AS (
     SELECT
-        sale_id,
+        sale_key,
         store_id,
         user_id_db,
         current_url,
         local_time,
         time_stamp,
-        country,
+        country_name,
         cart_product.product_id AS product_id,
         cart_product.amount AS amount,
         cart_product.price AS price,
@@ -33,13 +39,13 @@ stg_sale__flatten AS (
 ),
 stg_sale__clean_price AS (
     SELECT
-        sale_id,
+        sale_key,
         store_id,
         user_id_db,
         current_url,
         local_time,
         time_stamp,
-        country,
+        country_name,
         product_id,
         amount,
         SAFE_CAST(REGEXP_REPLACE(price, r'[^0-9.]', '.') AS FLOAT64) AS price,

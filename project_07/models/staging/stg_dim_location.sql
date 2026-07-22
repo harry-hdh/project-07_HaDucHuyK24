@@ -28,7 +28,6 @@ stg_dim_location__dedup AS (
 
 stg_dim_location__gen_key AS (
     SELECT
-        location_ip,
         country_name,
         region_name,
         city_name,
