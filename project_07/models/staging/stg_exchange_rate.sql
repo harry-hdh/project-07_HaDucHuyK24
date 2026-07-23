@@ -4,6 +4,8 @@ WITH stg_exchange_rate__source AS (
 ),
 stg_exchange_rate__select AS (
     SELECT
+        time_stamp,
+        currency_code,
         exchange_rate,
         inserted_date,
         inserted_by
@@ -11,10 +13,12 @@ stg_exchange_rate__select AS (
 ),
 stg_exchange_rate__gen_id AS (
     SELECT
+        TIMESTAMP_SECONDS(time_stamp) AS time_stamp,
+        currency_code,
         exchange_rate,
         inserted_date,
         inserted_by,
-        FARM_FINGERPRINT(CAST(exchange_rate AS STRING) || CAST(inserted_date AS STRING) || CAST(inserted_by AS STRING)) AS exchange_rate_id
+        FARM_FINGERPRINT(currency_code ||CAST(exchange_rate AS STRING) || CAST(inserted_date AS STRING) || CAST(inserted_by AS STRING)) AS exchange_rate_key
     FROM stg_exchange_rate__select
 )
 SELECT * FROM stg_exchange_rate__gen_id

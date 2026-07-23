@@ -1,0 +1,300 @@
+version: 2
+
+models:
+
+  # ==========================================
+  # DIMENSION TABLE: PRODUCT
+  # ==========================================
+  - name: dim_product
+    description: "Dimension table housing jewelry catalog metadata, material attributes, and product specifications."
+    meta:
+      owner: "product_analytics"
+      layer: "marts"
+      domain: "catalog"
+
+    columns:
+      - name: product_key
+        description: "Primary key identifying each product."
+        meta:
+          is_primary_key: true
+        tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        description: "Product identifier for each product."
+        tests:
+          - unique
+          - not_null
+
+      - name: product_name
+        description: "Title / Display name of the jewelry item."
+        tests:
+          - not_null
+
+  # ==========================================
+  # DIMENSION TABLE: CUSTOMER
+  # ==========================================
+  - name: dim_customer
+    description: "Deduplicated customer dimension based on database user ID, email."
+    meta:
+      owner: "CRM_team"
+      layer: "marts"
+      domain: "crm"
+      contains_pii: true
+
+    columns:
+      - name: customer_key
+        description: "Surrogate primary key generated per deduplicated entity."
+        meta:
+          is_primary_key: true
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_email_address
+        description: "Customer email address for identification."
+        meta:
+          contains_pii: true
+
+      - name: customer_device_type
+        description: "Device type used by the customer to access the storefront."
+        tests:
+          - not_null
+
+      - name: customer_db_id
+        description: "Database user ID for the customer."
+        tests:
+          - not_null
+
+  # ==========================================
+  # DIMENSION TABLE: STORE
+  # ==========================================
+  - name: dim_store
+    description: "Dimension table detailing storefront channels and domains."
+    meta:
+      owner: "retail_ops"
+      layer: "marts"
+
+    columns:
+      - name: store_id
+        description: "Primary key of the store outlet."
+        meta:
+          is_primary_key: true
+        tests:
+          - unique
+          - not_null
+
+
+  # ==========================================
+  # DIMENSION TABLE: LOCATION
+  # ==========================================
+  - name: dim_location
+    description: "Geographic dimension table mapping countries, regions, and cities."
+    meta:
+      owner: "data_engineering"
+      layer: "marts"
+
+    columns:
+      - name: location_id
+        description: "Primary key for geographic location entity."
+        meta:
+          is_primary_key: true
+        tests:
+          - unique
+          - not_null
+
+
+  # ==========================================
+  # DIMENSION TABLE: DATE
+  # ==========================================
+  - name: dim_date
+    description: "Calendar date spine table supporting time-based aggregation across models."
+    meta:
+      owner: "bi_team"
+      layer: "marts"
+
+    columns:
+      - name: date_key
+        description: "Primary key represented as an integer"
+        meta:
+          is_primary_key: true
+        tests:
+          - unique
+          - not_null
+
+      - name: time_stamp
+        description: "Timestamp represented as an UTC datetime object."
+        tests:
+          - not_null
+
+      - name: year
+        description: "Year component of the calendar date."
+        tests:
+          - not_null
+        
+      - name: month
+        description: "Month component of the calendar date."
+        tests:
+          - not_null
+
+      - name: day
+        description: "Day component of the calendar date."
+        tests:
+          - not_null
+
+      - name: week_day
+        description: "Day of the week component of the calendar."
+        tests:
+          - not_null
+
+      - name: is_weekend
+        description: "Boolean indicating if the calendar day falls on Saturday or Sunday."
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+      - name: is_holiday
+        description: "Boolean indicating if the calendar day is a public holiday."
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+# ==========================================
+# FACT TABLE: SALE
+# ==========================================
+  - name: fact_sale
+    description: "Central sales transaction fact table containing line-item e-commerce transactions partitioned by daily event timestamps."
+    meta:
+      owner: "data_engineering"
+      layer: "marts"
+      domain: "sales"
+      data_sensitivity: "internal"
+      primary_bi_tool: "Looker"
+
+    columns:
+      - name: sale_key
+        description: "Primary key for each individual sale line item."
+        meta:
+          is_primary_key: true
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_key
+        description: "Foreign key linking to dim_customer. Coalesced to -1 if unmapped."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_key
+
+      - name: product_key
+        description: "Foreign key linking to dim_product. Coalesced to -1 if unmapped."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_product')
+              field: product_key
+
+      - name: store_key
+        description: "Foreign key linking to dim_store."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_store')
+              field: store_key
+
+      - name: date_key
+        description: "Foreign key integer (YYYYMMDD) linking to dim_date."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+
+      - name: location_key
+        description: "Foreign key linking to dim_location."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_key
+
+      - name: currency_key
+        description: "Foreign key linking to dim_currency."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_currency')
+              field: currency_key
+
+      - name: price
+        description: "Unit sale price of the item."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+
+      - name: amount
+        description: "Quantity of items purchased in the line item transaction."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+
+      - name: time_stamp
+        description: "Exact UTC timestamp of when the sale event was recorded."
+        tests:
+          - not_null
+
+      - name: local_time
+        description: "The local timestamp of when the sale event was recorded."
+        tests:
+          - not_null
+
+      - name: current_url
+        description: "The URL of the page where the sale was made."
+        tests:
+          - not_null
+
+# ==========================================
+# FACT TABLE: DAILY EXCHANGE RATES
+# ==========================================
+  - name: fact_exchange_rate
+    description: "Foreign exchange conversion rates relative to standard base currency."
+    meta:
+      owner: "finance_team"
+      layer: "marts"
+      domain: "finance"
+
+    columns:
+      - name: exchange_rate_key
+        description: "Primary key for the daily currency exchange rate entry."
+        tests:
+          - unique
+          - not_null
+
+      - name: currency_key
+        description: "Foreign key linking to dim_currency."
+        tests:
+          - relationships:
+              to: ref('dim_currency')
+              field: currency_key
+
+      - name: date_key
+        description: "Foreign key integer (YYYYMMDD) linking to dim_date."
+        tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+
+      - name: exchange_rate
+        description: "The exchange rate value for the given currency on the specified date."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              inclusive: true
+

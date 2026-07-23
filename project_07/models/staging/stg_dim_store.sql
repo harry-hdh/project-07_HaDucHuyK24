@@ -13,9 +13,9 @@ stg_dim_store__filtered AS (
     SELECT *
     FROM stg_dim_store__process_url
     WHERE store_url IS NOT NULL
-    AND store_url like 'https://glamira.%'
+    AND store_url like '%glamira.%'
 ),
-stg_dim_store__extract_extension AS (
+stg_dim_store__extract AS (
     SELECT
         store_id,
         store_url,
@@ -64,7 +64,7 @@ stg_dim_store__transform_extension AS (
             when 'local' then 'Local'
             else 'Unknown'
         end as store_extension
-    FROM stg_dim_store__extract_extension
+    FROM stg_dim_store__extract
 ),
 
 stg_dim_store__store_name AS (
@@ -76,7 +76,7 @@ stg_dim_store__store_name AS (
 ),
 stg_dim_store__cast_type AS (
     SELECT
-        CAST(store_id AS INT64) AS store_id,
+        COALESCE(CAST(store_id AS INT64), -1) AS store_id,
         CAST(store_url AS STRING) AS store_url,
         CAST(store_name AS STRING) AS store_name
     FROM stg_dim_store__store_name

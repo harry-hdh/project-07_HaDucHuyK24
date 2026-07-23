@@ -29,6 +29,10 @@ dim_date AS (
     SELECT date_key, time_stamp AS time_stamp
     FROM {{ ref('dim_date') }}
 ),
+dim_store AS (
+    SELECT store_key, store_id
+    FROM {{ ref('dim_store') }}
+),
 fact_sale__join_dimentions AS (
     SELECT
         s.sale_key,
@@ -37,6 +41,7 @@ fact_sale__join_dimentions AS (
         dc.currency_key,
         dcu.customer_key,
         dd.date_key,
+        ds.store_key,
         s.current_url,
         s.local_time,
         s.time_stamp,
@@ -48,6 +53,7 @@ fact_sale__join_dimentions AS (
      JOIN dim_currency dc ON dc.currency_code = s.currency_code
      JOIN dim_customer dcu ON dcu.customer_db_id = s.user_id_db
      JOIN dim_date dd ON dd.time_stamp = s.time_stamp
+     JOIN dim_store ds ON ds.store_id = s.store_id
 
 ),
 fact_sale__dedup AS (

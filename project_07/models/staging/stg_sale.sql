@@ -40,7 +40,7 @@ stg_sale__flatten AS (
 stg_sale__clean_price AS (
     SELECT
         sale_key,
-        store_id,
+        COALESCE(CAST(store_id AS INT64), -1) AS store_id,
         COALESCE(user_id_db, -1) AS user_id_db,
         current_url,
         currency_code,
